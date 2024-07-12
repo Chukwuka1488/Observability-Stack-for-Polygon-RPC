@@ -10,4 +10,4 @@ LICENSE
 terraform/README.md
 *tfstate*
 venv/
-kubernetes-monitoring/values.yml
+kubernetes-monitoring/*yml
