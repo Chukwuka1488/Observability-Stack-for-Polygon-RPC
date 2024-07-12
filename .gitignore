@@ -1,0 +1,13 @@
+terraform/terraform.tfvars
+.terraform
+.terraform.lock.hcl
+CHANGELOG.md
+changelog.yml
+civo-sre-cluster-kubeconfig
+civo.tar.gz
+kubectl
+LICENSE
+terraform/README.md
+*tfstate*
+venv/
+kubernetes-monitoring/values.yml
