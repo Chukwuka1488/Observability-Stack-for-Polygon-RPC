@@ -1,0 +1,33 @@
+apiVersion: monitoring.coreos.com/v1  # The API version of the custom resource definition
+kind: PrometheusRule  # The kind of resource being created, in this case, a PrometheusRule
+metadata:
+  name: polygon-rpc-app-rules  # The name of this PrometheusRule resource
+  namespace: monitoring  # The namespace where this resource will be created
+  labels:
+    release: prometheus  # A label indicating the Prometheus release
+    prometheus: k8s  # A label indicating this rule is for a Kubernetes Prometheus instance
+    role: alert-rules  # A label indicating the role of this resource is to define alert rules
+spec:
+  groups:
+  - name: polygon-rpc-app.rules  # The name of the group of rules
+    rules:
+    - alert: HighRequestLatency  # The name of the alert
+      expr: histogram_quantile(0.99, sum(rate(flask_app_request_latency_seconds_bucket[5m])) by (le)) > 1  # The PromQL expression to evaluate
+      # The expression calculates the 99th percentile of the request latency over a 5-minute window.
+      # If this latency exceeds 1 second, the alert will be triggered.
+      for: 5m  # The duration for which the condition must be true before the alert is triggered
+      labels:
+        severity: critical  # The severity level of this alert
+      annotations:
+        summary: "High request latency detected"  # A brief summary of the alert
+        description: "The 99th percentile request latency is above 1 second for more than 5 minutes."  # A detailed description of the alert
+    - alert: HighRequestCount  # The name of the alert
+      expr: sum(rate(flask_app_request_count_total[5m])) by (endpoint, method) > 100  # The PromQL expression to evaluate
+      # The expression calculates the rate of requests over a 5-minute window.
+      # If the rate exceeds 100 requests per second for any endpoint and method, the alert will be triggered.
+      for: 5m  # The duration for which the condition must be true before the alert is triggered
+      labels:
+        severity: warning  # The severity level of this alert
+      annotations:
+        summary: "High request count detected"  # A brief summary of the alert
+        description: "The request count has exceeded 100 requests per second for more than 5 minutes."  # A detailed description of the alert

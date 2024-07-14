@@ -8,6 +8,7 @@ from flask_restx import Api, Resource, fields
 import logging
 import time
 
+
 # Initialize Flask application
 app = Flask(__name__)
 
@@ -97,3 +98,5 @@ if __name__ == '__main__':
         '/metrics': make_wsgi_app()
     })
     app.run(host='0.0.0.0', port=5001)
+
+docker push chukwuka1488/polygon-rpc-app:v1.0.0

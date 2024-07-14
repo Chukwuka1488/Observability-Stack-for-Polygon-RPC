@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: polygon-rpc-app
+  labels:
+    app: polygon-rpc-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: polygon-rpc-app
+  template:
+    metadata:
+      labels:
+        app: polygon-rpc-app
+    spec:
+      containers:
+      - name: polygon-rpc-app
+        image: chukwuka1488/polygon-rpc-app:v1.0.0
+        ports:
+        - containerPort: 5001
+        env:
+        - name: FLASK_APP
+          value: app
+        resources:
+          requests:
+            memory: "256Mi"   # Request 256 MiB of memory
+            cpu: "100m"       # Request 100 milli CPUs (0.1 CPUs)
+          limits:
+            memory: "512Mi"   # Limit memory usage to 512 MiB
+            cpu: "200m"       # Limit CPU usage to 200 milli CPUs (0.2 CPUs)

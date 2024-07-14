@@ -17,7 +17,7 @@ To integrate Prometheus metrics and Flask-RESTPlus for API documentation into yo
 
 - **Flask-RESTx Integration**:
   - A `block_model` is defined using Flask-RESTx `api.model` for defining the structure of the response.
-  - A Flask-RESTPlus `Resource` class `BlockNumber` is used to define the `/block_number` endpoint, which fetches and returns the current Polygon block number.
+  - A Flask-RESTx `Resource` class `BlockNumber` is used to define the `/block_number` endpoint, which fetches and returns the current Polygon block number.
 
 - **Scheduler and Logging**:
   - A background scheduler (`BackgroundScheduler`) is used to fetch the block number every 5 minutes.
@@ -44,3 +44,12 @@ This setup provides a robust Flask application with integrated Prometheus metric
 - **CMD**: Specifies the command to run when the container starts. In this case, Gunicorn is used to serve the Flask application (`src.app:app`) and bind it to `0.0.0.0:5001`, making it accessible externally.
 
 Ensure that your directory structure and naming conventions match what is specified in the Dockerfile (`src/app.py` for the Flask application file). This Dockerfile should build and run your Flask application effectively inside a Docker container.
+
+export KUBECONFIG=/workspaces/Observability-Stack-for-Polygon-RPC/terraform/civo-sre-cluster-kubeconfig 
+kubectl config get-contexts
+alias k=kubectl
+
+- port forward prometheus
+
+kubectl get pods -n monitoring
+kubectl port-forward -n monitoring prometheus-prometheus-kube-prometheus-prometheus-0  9090:9090
