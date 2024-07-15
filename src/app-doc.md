@@ -45,7 +45,7 @@ This setup provides a robust Flask application with integrated Prometheus metric
 
 Ensure that your directory structure and naming conventions match what is specified in the Dockerfile (`src/app.py` for the Flask application file). This Dockerfile should build and run your Flask application effectively inside a Docker container.
 
-export KUBECONFIG=/workspaces/Observability-Stack-for-Polygon-RPC/terraform/civo-sre-cluster-kubeconfig 
+export KUBECONFIG=/Users/simplymenah/Downloads/SRE/Observability-Stack-for-Polygon-RPC/terraform/civo-sre-cluster-kubeconfig 
 kubectl config get-contexts
 alias k=kubectl
 

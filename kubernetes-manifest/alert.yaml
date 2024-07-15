@@ -1,0 +1,37 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: alert-config
+  namespace: monitoring  # Replace with your target namespace
+  labels:
+    resource: prometheus
+spec:
+  route:
+    groupBy: ["severity"]
+    groupWait: 30s       # Time to wait before dispatching a group of alerts
+    groupInterval: 5m    # Interval at which to group alerts of the same group
+    repeatInterval: 3h   # Interval at which to resend alerts that remain active
+    receiver: 'default-receiver'  # Default receiver for alerts
+    # routes:
+    #   - match:
+    #       alertname: HighRequestLatency  # Match alerts with this alertname
+    #     receiver: 'webhook-receiver'    # Send matched alerts to this receiver
+    #   - match:
+    #       alertname: HighRequestCount    # Match alerts with this alertname
+    #     receiver: 'webhook-receiver'    # Send matched alerts to this receiver
+
+  receivers:
+    - name: 'default-receiver'
+      webhookConfigs:
+        - url: 'http://your-webhook-endpoint'  # Replace with your actual webhook endpoint
+
+    # - name: 'webhook-receiver'
+    #   webhook_configs:
+    #     - url: 'http://your-webhook-endpoint'  # Replace with your actual webhook endpoint
+
+  # inhibit_rules:
+  #   - source_match:
+  #       severity: 'critical'  # Source alerts with severity 'critical'
+  #     target_match:
+  #       severity: 'warning'   # Inhibit target alerts with severity 'warning'
+  #     equal: ['alertname']   # Inhibit if both source and target have the same alertname
