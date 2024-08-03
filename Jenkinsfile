@@ -91,6 +91,12 @@ def getIncrementalVersion() {
         version = readFile(versionFile).trim()
         def (major, minor, patch) = version.replace('v', '').split('\\.')
         patch = patch.toInteger() + 1
+        
+        if (patch == 100) {
+            patch = 0
+            minor = minor.toInteger() + 1
+        }
+        
         version = "v${major}.${minor}.${patch}"
     }
     
