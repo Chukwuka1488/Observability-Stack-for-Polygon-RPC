@@ -1,12 +1,12 @@
 pipeline {
-    agent any
+    agent any // Use any available agent for the pipeline
 
     environment {
+        DOCKER_TAG = getDockerTag() // Get the Docker tag from the Git commit hash
         DOCKERHUB_CREDENTIALS_ID = 'DOCKERHUB_CREDENTIALS_ID' // Jenkins credentials ID for Docker Hub
-        DOCKER_IMAGE = 'chukwuka1488/polygon-rpc-app:v1.0.0'
+        DOCKER_IMAGE = "chukwuka1488/polygon-rpc-app:${DOCKER_TAG}" // Docker image name with tag
         DOCKERFILE_DIR = 'src' // Directory containing Dockerfile
-        KUBECONFIG_CREDENTIALS_ID = 'kubeconfig-credentials' // Jenkins credentials ID for Kubernetes || kubectl config view --raw > kubeconfig.yaml
-
+        KUBECONFIG_CREDENTIALS_ID = 'kubeconfig-credentials' // Jenkins credentials ID for Kubernetes (kubectl config view --raw > kubeconfig.yaml)
     }
 
     stages {
@@ -37,6 +37,15 @@ pipeline {
             }
         }
 
+        stage('Update Kubernetes Manifests') {
+            steps {
+                script {
+                    // Update the Kubernetes deployment manifest with the new Docker tag
+                    sh './changeTag.sh ${DOCKER_TAG}'
+                }
+            }
+        }
+
         stage('Deploy to Kubernetes') {
             steps {
                 script {
@@ -51,10 +60,16 @@ pipeline {
 
     post {
         success {
-            echo 'Build and Deployment completed successfully!'
+            echo 'Build and Deployment completed successfully!' // Message on successful build and deployment
         }
         failure {
-            echo 'Build or Deployment failed!'
+            echo 'Build or Deployment failed!' // Message on build or deployment failure
         }
     }
+}
+
+// Function to get the Docker tag from the Git commit hash
+def getDockerTag() {
+    def tag = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+    return tag
 }
