@@ -1,3 +1,5 @@
+# prometheus-rule.yaml
+---
 apiVersion: monitoring.coreos.com/v1  # The API version of the custom resource definition
 kind: PrometheusRule  # The kind of resource being created, in this case, a PrometheusRule
 metadata:

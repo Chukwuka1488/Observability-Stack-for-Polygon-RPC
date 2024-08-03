@@ -1,3 +1,5 @@
+# service-monitor.yaml
+---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -13,8 +15,12 @@ spec:
       app: polygon-rpc-app
   namespaceSelector:
     matchNames:
-    - default
+      - default
   endpoints:
     - interval: 60s
       port: http
       path: /metrics
+      scheme: http
+  targetLabels:
+    - service
+    - pod

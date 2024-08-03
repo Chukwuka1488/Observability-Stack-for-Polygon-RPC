@@ -1,12 +1,12 @@
-from flask import Flask, jsonify, redirect, url_for, request
+from flask import Flask, redirect, url_for, request
 from web3 import Web3
 from apscheduler.schedulers.background import BackgroundScheduler
-from prometheus_client import Counter, Histogram, generate_latest, REGISTRY
+from prometheus_client import Counter, Histogram, make_wsgi_app
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
-from prometheus_client import make_wsgi_app
 from flask_restx import Api, Resource, fields
 import logging
 import time
+import werkzeug.serving
 
 
 # Initialize Flask application
@@ -17,7 +17,7 @@ api = Api(app, version='1.0', title='PolygonRPC API', description='API for fetch
 
 # Initialize Prometheus metrics
 REQUEST_COUNT = Counter('flask_app_request_count', 'App Request Count', ['method', 'endpoint', 'http_status'])
-REQUEST_LATENCY = Histogram('flask_app_request_latency_seconds', 'Request latency', ['method', 'endpoint'])
+REQUEST_LATENCY = Histogram('flask_app_request_latency_seconds', 'Request latency', ['method', 'endpoint'], buckets=[0.1, 0.5, 1, 2, 5, 10])
 
 # Initialize PolygonRPC class for interacting with Polygon RPC
 class PolygonRPC():
@@ -70,12 +70,7 @@ class BlockNumber(Resource):
 # Flask route for index page redirecting to block_number endpoint
 @app.route('/', methods=['GET'])
 def index():
-    return redirect(url_for('block_number'))
-
-# Prometheus metrics endpoint
-@app.route('/metrics')
-def metrics():
-    return generate_latest(REGISTRY)
+    return redirect(url_for('blocknumber'))  # Corrected endpoint
 
 # Background job to fetch block number every 5 minutes
 def fetch_block_number_job():
@@ -94,9 +89,11 @@ if __name__ == '__main__':
     fetch_block_number_job()
 
     # Run Flask app with Prometheus WSGI middleware for metrics
-    app_dispatch = DispatcherMiddleware(app, {
-        '/metrics': make_wsgi_app()
-    })
-    app.run(host='0.0.0.0', port=5001)
-
-docker push chukwuka1488/polygon-rpc-app:v1.0.0
+    # Make sure the server is using app_dispatch with DispatcherMiddleware
+    werkzeug.serving.run_simple(
+        hostname='0.0.0.0',
+        port=5001,
+        application=DispatcherMiddleware(app, {'/metrics': make_wsgi_app()}),
+        use_debugger=False,
+        use_reloader=False
+    )

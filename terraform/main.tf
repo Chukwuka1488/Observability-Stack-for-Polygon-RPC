@@ -25,6 +25,25 @@ resource "civo_firewall" "my_firewall" {
     action     = "allow"
   }
 
+
+  ingress_rule {
+    label      = "http"
+    protocol   = "tcp"
+    port_range = "80"
+    cidr       = ["0.0.0.0/0"]
+    action     = "allow"
+  }
+
+
+  # for jenkins
+  ingress_rule {
+    label      = "jenkins"
+    protocol   = "tcp"
+    port_range = "8080"
+    cidr       = ["0.0.0.0/0"]
+    action     = "allow"
+  }
+
   egress_rule {
     label      = "all"
     protocol   = "tcp"
