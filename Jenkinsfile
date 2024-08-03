@@ -10,6 +10,15 @@ pipeline {
     }
 
     stages {
+        stage('Test Git') {
+            steps {
+                script {
+                    sh 'git --version'
+                }
+            }
+        }
+
+
         stage('Checkout') {
             steps {
                 // Clone the repository from GitHub
