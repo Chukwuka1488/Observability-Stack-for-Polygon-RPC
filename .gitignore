@@ -11,3 +11,4 @@ terraform/README.md
 *tfstate*
 venv/
 kubernetes-monitoring/*yml
+kubernetes-monitoring/*yaml

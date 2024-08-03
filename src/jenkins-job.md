@@ -118,3 +118,72 @@ Got it! Since your Jenkins is installed via Helm in a Kubernetes cluster, you ca
      ```
 
 By following these steps, you can ensure that Git is installed on your Jenkins agent pod and verify its version. If you encounter any issues or need further assistance, feel free to ask! 😊
+
+Great! Let's walk through the workflow of how the Jenkins job is triggered when you push new code to your GitHub repository:
+
+### Workflow Overview
+
+1. **Push Code to GitHub**:
+
+   - You push new code to your GitHub repository.
+
+2. **GitHub Webhook**:
+
+   - The GitHub webhook is triggered by the push event. The webhook sends a payload to the Jenkins server's webhook URL.
+
+3. **Jenkins Receives Webhook**:
+
+   - Jenkins, exposed via the Ingress controller, receives the webhook payload at the configured URL (e.g., `http://jenkins.gm-nig-ltd.tech/github-webhook/`).
+
+4. **Jenkins Job Triggered**:
+
+   - Jenkins processes the webhook payload and triggers the corresponding Jenkins job (pipeline) defined in your repository.
+
+5. **Pipeline Execution**:
+
+   - The Jenkins pipeline defined in your `Jenkinsfile` at the root of your repository is executed. The pipeline stages are as follows:
+     - **Test Git**: Verifies the Git installation.
+     - **Checkout**: Clones the repository from GitHub.
+     - **Build Docker Image**: Builds the Docker image using the Dockerfile in the specified directory.
+     - **Push to Docker Hub**: Pushes the Docker image to Docker Hub.
+     - **Update Kubernetes Manifests**: Updates the Kubernetes deployment manifest with the new Docker tag.
+     - **Deploy to Kubernetes**: Applies the updated deployment manifest to the Kubernetes cluster.
+
+6. **Post-Build Actions**:
+   - Depending on the success or failure of the pipeline, Jenkins executes the post-build actions defined in the `post` section of the `Jenkinsfile`.
+
+### Detailed Steps
+
+1. **Push Code to GitHub**:
+
+   - You make changes to your code and push the changes to your GitHub repository.
+
+2. **GitHub Webhook**:
+
+   - The configured webhook in your GitHub repository sends a payload to the Jenkins server's webhook URL:
+     ```
+     http://jenkins.gm-nig-ltd.tech/github-webhook/
+     ```
+
+3. **Jenkins Receives Webhook**:
+
+   - Jenkins receives the webhook payload and identifies the corresponding job to trigger based on the repository and branch information.
+
+4. **Jenkins Job Triggered**:
+
+   - Jenkins triggers the pipeline job defined in your `Jenkinsfile`.
+
+5. **Pipeline Execution**:
+
+   - The pipeline stages are executed in the following order:
+     - **Test Git**: Runs the `git --version` command to verify Git installation.
+     - **Checkout**: Clones the repository from GitHub using the `git` step.
+     - **Build Docker Image**: Builds the Docker image using the `docker.build` step.
+     - **Push to Docker Hub**: Pushes the Docker image to Docker Hub using the `docker.withRegistry` and `docker.image` steps.
+     - **Update Kubernetes Manifests**: Updates the Kubernetes deployment manifest with the new Docker tag using the `sh` step.
+     - **Deploy to Kubernetes**: Applies the updated deployment manifest to the Kubernetes cluster using the `kubectl apply` command.
+
+6. **Post-Build Actions**:
+   - If the pipeline succeeds, Jenkins prints a success message. If the pipeline fails, Jenkins prints a failure message.
+
+By following this workflow, your Jenkins job will be automatically triggered whenever you push new code to your GitHub repository. If you have any further questions or need additional assistance, feel free to ask! 😊
