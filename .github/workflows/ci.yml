@@ -52,7 +52,7 @@ jobs:
         echo "Build Docker Image step completed" # Debugging message
 
     - name: Log in to Docker Hub
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }} # Use the Docker Hub username stored in secrets
         password: ${{ secrets.DOCKER_PASSWORD }} # Use the Docker Hub personal access token (PAT) stored in secrets
