@@ -43,16 +43,11 @@ jobs:
           version="v${major}.${minor}.${patch}"
         fi
         echo $version > $versionFile
-        echo "::set-output name=version::$version" # Increment the version number and set it as an output
+        echo "version=$version" >> $GITHUB_ENV # Save the version to GitHub environment
         echo "Increment Version step completed" # Debugging message
 
-    - name: Build Docker Image
-      run: |
-        docker build -t chukwuka1488/polygon-rpc-app:${{ steps.increment_version.outputs.version }} $DOCKERFILE_DIR # Build the Docker image using the specified Dockerfile directory
-        echo "Build Docker Image step completed" # Debugging message
-
     - name: Log in to Docker Hub
-      uses: docker/login-action@v3
+      uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_USERNAME }} # Use the Docker Hub username stored in secrets
         password: ${{ secrets.DOCKER_PASSWORD }} # Use the Docker Hub personal access token (PAT) stored in secrets
@@ -60,14 +55,19 @@ jobs:
     - name: Log in to Docker Hub Completed
       run: echo "Log in to Docker Hub step completed" # Debugging message
 
+    - name: Build Docker Image
+      run: |
+        docker build -t chukwuka1488/polygon-rpc-app:${{ env.version }} $DOCKERFILE_DIR # Build the Docker image using the specified Dockerfile directory
+        echo "Build Docker Image step completed" # Debugging message
+
     - name: Push Docker Image
       run: |
-        docker push chukwuka1488/polygon-rpc-app:${{ steps.increment_version.outputs.version }} # Push the Docker image to Docker Hub
+        docker push chukwuka1488/polygon-rpc-app:${{ env.version }} # Push the Docker image to Docker Hub
         echo "Push Docker Image step completed" # Debugging message
 
     - name: Update Kubernetes Manifests
       run: |
-        ./changeTag.sh ${{ steps.increment_version.outputs.version }} # Update the Kubernetes deployment manifest with the new Docker tag
+        ./changeTag.sh ${{ env.version }} # Update the Kubernetes deployment manifest with the new Docker tag
         echo "Update Kubernetes Manifests step completed" # Debugging message
 
     - name: Set up Kubernetes
