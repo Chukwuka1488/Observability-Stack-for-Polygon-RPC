@@ -49,7 +49,7 @@ jobs:
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
-        username: ${{ secrets.DOCKER_USERNAME }} # Use the Docker Hub username stored in secrets
+        username: ${{ secrets.DOCKERHUB_USERNAME }} # Use the Docker Hub username stored in secrets
         password: ${{ secrets.DOCKER_PASSWORD }} # Use the Docker Hub personal access token (PAT) stored in secrets
 
     - name: Log in to Docker Hub Completed
