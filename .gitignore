@@ -12,3 +12,5 @@ terraform/README.md
 venv/
 kubernetes-monitoring/*yml
 kubernetes-monitoring/*yaml
+kubeconfig.yaml  
+kubeconfig.base64
