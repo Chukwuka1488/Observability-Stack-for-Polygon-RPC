@@ -1,0 +1,88 @@
+name: CI Pipeline # Name of the GitHub Actions workflow
+
+on:
+  push:
+    branches:
+    - main # Trigger the workflow on push events to the main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Use the latest Ubuntu runner for the job
+
+    env:
+      DOCKER_TAG: ${{ steps.increment_version.outputs.version }} # Set the Docker tag using the output from the Increment Version step
+      DOCKER_IMAGE: chukwuka1488/polygon-rpc-app:${{ steps.increment_version.outputs.version }} # Define the Docker image name with the tag
+      DOCKERFILE_DIR: src # Directory containing the Dockerfile
+
+    steps:
+    - name: Test Git
+      run: |
+        git --version # Check the Git version to ensure Git is installed
+        echo "Test Git step completed" # Debugging message
+
+    - name: Checkout Repository
+      uses: actions/checkout@v2 # Use the checkout action to clone the repository
+
+    - name: Checkout Repository Completed
+      run: echo "Checkout Repository step completed" # Debugging message
+
+    - name: Increment Version
+      id: increment_version
+      run: |
+        versionFile=version.txt
+        version=v1.0.0
+        if [ -f "$versionFile" ]; then
+          version=$(cat $versionFile)
+          IFS='.' read -r -a versionParts <<< "${version//v/}"
+          major=${versionParts[0]}
+          minor=${versionParts[1]}
+          patch=${versionParts[2]}
+          patch=$((patch + 1))
+          if [ "$patch" -eq 100 ]; then
+            patch=0
+            minor=$((minor + 1))
+          fi
+          version="v${major}.${minor}.${patch}"
+        fi
+        echo $version > $versionFile
+        echo "::set-output name=version::$version" # Increment the version number and set it as an output
+        echo "Increment Version step completed" # Debugging message
+
+    - name: Build Docker Image
+      run: |
+        docker build -t $DOCKER_IMAGE $DOCKERFILE_DIR # Build the Docker image using the specified Dockerfile directory
+        echo "Build Docker Image step completed" # Debugging message
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }} # Use the Docker Hub username stored in secrets
+        password: ${{ secrets.DOCKER_PASSWORD }} # Use the Docker Hub personal access token (PAT) stored in secrets
+
+    - name: Log in to Docker Hub Completed
+      run: echo "Log in to Docker Hub step completed" # Debugging message
+
+    - name: Push Docker Image
+      run: |
+        docker push $DOCKER_IMAGE # Push the Docker image to Docker Hub
+        echo "Push Docker Image step completed" # Debugging message
+
+    - name: Update Kubernetes Manifests
+      run: |
+        ./changeTag.sh $DOCKER_TAG # Update the Kubernetes deployment manifest with the new Docker tag
+        echo "Update Kubernetes Manifests step completed" # Debugging message
+
+    - name: Set up Kubernetes
+      uses: azure/setup-kubectl@v1
+      with:
+        version: 'latest' # Set up kubectl for deploying to Kubernetes
+
+    - name: Set up Kubernetes Completed
+      run: echo "Set up Kubernetes step completed" # Debugging message
+
+    - name: Deploy to Kubernetes
+      env:
+        KUBECONFIG: ${{ secrets.KUBECONFIG }} # Use the Kubernetes configuration file content stored in secrets
+      run: |
+        kubectl apply -f kubernetes-manifest/deployment.yaml # Apply the Kubernetes deployment manifest
+        echo "Deploy to Kubernetes step completed" # Debugging message
