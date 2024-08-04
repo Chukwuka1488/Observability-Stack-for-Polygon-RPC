@@ -10,8 +10,6 @@ jobs:
     runs-on: ubuntu-latest # Use the latest Ubuntu runner for the job
 
     env:
-      DOCKER_TAG: ${{ steps.increment_version.outputs.version }} # Set the Docker tag using the output from the Increment Version step
-      DOCKER_IMAGE: chukwuka1488/polygon-rpc-app:${{ steps.increment_version.outputs.version }} # Define the Docker image name with the tag
       DOCKERFILE_DIR: src # Directory containing the Dockerfile
 
     steps:
@@ -50,7 +48,7 @@ jobs:
 
     - name: Build Docker Image
       run: |
-        docker build -t $DOCKER_IMAGE $DOCKERFILE_DIR # Build the Docker image using the specified Dockerfile directory
+        docker build -t chukwuka1488/polygon-rpc-app:${{ steps.increment_version.outputs.version }} $DOCKERFILE_DIR # Build the Docker image using the specified Dockerfile directory
         echo "Build Docker Image step completed" # Debugging message
 
     - name: Log in to Docker Hub
@@ -64,12 +62,12 @@ jobs:
 
     - name: Push Docker Image
       run: |
-        docker push $DOCKER_IMAGE # Push the Docker image to Docker Hub
+        docker push chukwuka1488/polygon-rpc-app:${{ steps.increment_version.outputs.version }} # Push the Docker image to Docker Hub
         echo "Push Docker Image step completed" # Debugging message
 
     - name: Update Kubernetes Manifests
       run: |
-        ./changeTag.sh $DOCKER_TAG # Update the Kubernetes deployment manifest with the new Docker tag
+        ./changeTag.sh ${{ steps.increment_version.outputs.version }} # Update the Kubernetes deployment manifest with the new Docker tag
         echo "Update Kubernetes Manifests step completed" # Debugging message
 
     - name: Set up Kubernetes
